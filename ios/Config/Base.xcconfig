@@ -1,0 +1,2 @@
+GOOGLE_REVERSED_CLIENT_ID = devtrack-unconfigured
+#include? "Firebase.local.xcconfig"

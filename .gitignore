@@ -27,3 +27,6 @@ __pycache__/
 *.pyc
 firestore-debug.log
 ui-debug.log
+ios/DevTrack.xcodeproj/
+desktop/src-tauri/gen/
+ios/Config/Firebase.local.xcconfig

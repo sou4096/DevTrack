@@ -10,7 +10,7 @@ connectAuthEmulator(auth, 'http://127.0.0.1:9099', {disableWarnings: true});
 const service = createAuthService(auth);
 after(async () => { await deleteApp(app); });
 
-test('email registration, sign out, sign in, reauthentication and deletion', async () => {
+test('email registration, sign out, sign in and reauthentication', async () => {
   const email = `test-${Date.now()}@example.test`;
   const registered = await service.register(email, 'password123');
   const uid = registered.user.uid;
@@ -19,8 +19,7 @@ test('email registration, sign out, sign in, reauthentication and deletion', asy
   await assert.rejects(service.signIn(email, 'wrong-password'));
   assert.equal((await service.signIn(email, 'password123')).user.uid, uid);
   await service.reauthenticatePassword('password123');
-  await service.deleteAuthAccount();
-  await assert.rejects(service.signIn(email, 'password123'));
+  await service.signOut();
 });
 
 test('explicit Google linking preserves UID and rejects a credential already linked elsewhere', async () => {

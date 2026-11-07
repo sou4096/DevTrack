@@ -46,4 +46,6 @@ npm ci
 npm run test:emulator
 ```
 
-認証アダプターはFirebase JavaScript SDKによる検証用の初版で、iOS・PCアプリへの組み込みやGoogleの実ログイン画面は未実装です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実環境への適用は行っていません。アカウント削除は認証アカウントのみで、Firestore等を含む完全削除は未実装です。
+認証アダプターはFirebase JavaScript SDKによる検証用の初版で、iOS・PCアプリへの組み込みやGoogleの実ログイン画面は未実装です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実環境への適用は行っていません。Firestore等を含む完全なアカウント削除は未実装です。
+
+認証画面の試作とFirebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOSの実Googleログイン、PCのGoogleログイン、アカウントの完全削除は未完成です。
