@@ -1,12 +1,15 @@
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
+    private enum LoginField: Hashable { case email, password }
     @ObservedObject var session: Session
     @State private var email = ""
     @State private var password = ""
     @State private var busy = false
     @State private var confirmDelete = false
     @State private var deleteWithGoogle = false
+    @FocusState private var focusedField: LoginField?
     private var deletionEnabled: Bool {
         #if DEBUG
         if ProcessInfo.processInfo.environment["DEVTRACK_AUTH_EMULATOR"] == "1" &&
@@ -41,10 +44,11 @@ struct ContentView: View {
                     Section("ログイン") {
                         TextField("メールアドレス", text: $email)
                             .keyboardType(.emailAddress).textInputAutocapitalization(.never).autocorrectionDisabled()
-                        SecureField("パスワード", text: $password)
-                        Button("ログイン") { run { await session.email(email, password: password, register: false) } }
-                        Button("アカウント作成") { run { await session.email(email, password: password, register: true) } }
-                        Button("Googleでログイン") { run { await session.google() } }
+                            .focused($focusedField, equals: .email)
+                        SecureField("パスワード", text: $password).focused($focusedField, equals: .password)
+                        Button("ログイン") { dismissKeyboard(); run { await session.email(email, password: password, register: false) } }
+                        Button("アカウント作成") { dismissKeyboard(); run { await session.email(email, password: password, register: true) } }
+                        Button("Googleでログイン") { dismissKeyboard(); run { await session.google() } }
                     }
                 }
                 if let error = session.error { Text(error).foregroundStyle(.red) }
@@ -66,5 +70,10 @@ struct ContentView: View {
     private func run(_ operation: @escaping () async -> Void) {
         busy = true
         Task { await operation(); busy = false }
+    }
+
+    private func dismissKeyboard() {
+        focusedField = nil
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
