@@ -1,6 +1,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseAuth
+import FirebaseFunctions
 import GoogleSignIn
 
 @main
@@ -14,6 +15,7 @@ struct DevTrackApp: App {
             options.projectID = "demo-devtrack"
             FirebaseApp.configure(options: options)
             Auth.auth().useEmulator(withHost: "127.0.0.1", port: 9099)
+            Functions.functions(region: "asia-northeast1").useEmulator(withHost: "127.0.0.1", port: 5001)
         } else if FirebaseApp.app() == nil && Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") != nil {
             FirebaseApp.configure()
         }

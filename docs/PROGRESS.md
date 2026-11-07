@@ -18,3 +18,11 @@
 - XcodeGenとRustをHomebrewで導入。iOSプロジェクトは `ios/project.yml` から生成する。詳細は `docs/FIREBASE_SETUP.md`。
 
 - 検証結果: 基盤テスト1件、Auth・Rules・削除ロジックのエミュレータテスト9件成功。PC画面はブラウザでエミュレータに接続して登録・ログアウト成功。iOS UIテストは `CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=-` で成功。Googleの実ログイン、Tauriウィンドウ内操作、Windowsと完全削除は未検証。
+
+## 2026-11-08 Google認証・削除作業
+
+- PC: 外部ブラウザ、PKCEとランダムなstate、ループバック受信、FirebaseへのGoogle認証・明示的な連携を実装。RFC例と不正な応答を拒否するRustテスト2件成功。Google CloudのデスクトップOAuthクライアント設定と実Googleログイン、Windows実機は未検証。
+- iOS: Googleログイン・連携は実装済み、実Googleアカウントでは未検証。シミュレータでメール登録・ログアウトおよびメール再認証後の削除要求のUIテスト計2件成功。
+- 削除: 認証時刻検証、Firestore削除マーカーによるアクセス拒否、再試行可能な再帰削除・Auth削除を実装。エミュレータで未認証拒否、ユーザー分離、入れ子の削除とAuth削除を検証。PC画面の削除操作をブラウザ＋エミュレータで検証。削除完了通知、各端末への削除伝播、全保存先・マーカーの保持ポリシーなど未完成のため本番UIは無効。Cloud Functionsは未デプロイで課金設定も無効。
+- FirestoreのリージョンとCloud Functionsの課金プランについて回答待ち。Firestore Rulesには削除マーカーによるアクセス拒否を追加し、実環境未デプロイ。
+- ローカル: Firebaseルール・認証・削除ロジック10件、削除関数の統合テスト1件、Rust 2件、iOS UI 2件成功。CI定義に関数の統合検証、macOSのRustテスト、iOSシミュレータテストを追加。

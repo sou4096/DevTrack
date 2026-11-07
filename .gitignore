@@ -30,3 +30,4 @@ ui-debug.log
 ios/DevTrack.xcodeproj/
 desktop/src-tauri/gen/
 ios/Config/Firebase.local.xcconfig
+desktop/google-oauth-client.json

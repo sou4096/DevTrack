@@ -1,32 +1,35 @@
 # Firebaseと開発環境
 
-Firebaseプロジェクト `devtrack-19cf3` にiOSアプリ `com.devtrack.app` とWebアプリ（PC用）を登録済み。設定ファイルは公開リポジトリに含めない。Authenticationの初期化とメール・Googleプロバイダの有効化を確認済み。PC向けGoogle OAuthクライアントは未設定。Firestore APIは未有効化で、データベースのリージョンは未決定。課金プランの変更は行っていない。
+プロジェクト `devtrack-19cf3` にiOSアプリ `com.devtrack.app` とPC用Webアプリを登録済み。メール・Googleプロバイダを有効化し、メール認証を実環境で検証済み。設定ファイルは公開リポジトリに含めない。Firestoreは未作成でリージョン選択を確認中。課金は無効で、Cloud Functionsの本番デプロイにはBlazeプランが必要。
 
 ## iOS
 
-XcodeとXcodeGenが必要。Firebaseコンソールでアプリ設定を取得し、`ios/DevTrack/GoogleService-Info.plist` に配置してから以下を実行する。Googleプロバイダ有効化後のplistに `CLIENT_ID` と `REVERSED_CLIENT_ID` が含まれる必要がある。`python3 configure.py` で無視対象のローカル設定を生成する。Firebase認証を利用するには実プロジェクトで該当プロバイダを有効にする。
+XcodeとXcodeGenが必要。Firebaseの設定 `GoogleService-Info.plist` を `ios/DevTrack/` に置き、以下を実行する。Googleプロバイダ有効化後の設定に `CLIENT_ID` と `REVERSED_CLIENT_ID` が必要。`configure.py` はローカル専用設定を生成する。
 
 ```sh
 cd ios
 python3 configure.py
 xcodegen generate
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project DevTrack.xcodeproj -scheme DevTrack -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project DevTrack.xcodeproj -scheme DevTrack -sdk iphonesimulator CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build
 ```
 
-エミュレータ専用の実行時環境変数 `DEVTRACK_AUTH_EMULATOR=1` は `demo-devtrack` を使用し、localhostのAuthenticationエミュレータに接続する。実機のlocalhostはMacではないため、そのまま実機に使わない。Googleの実ログイン・連携は未検証。
+実Googleログインは未検証。削除UIは `DEVTRACK_ACCOUNT_DELETION_ENABLED=YES` のビルド設定で有効にできるが、本番サービスの設定・運用検証が完了するまで無効とする。シミュレータUIテストは `DEVTRACK_AUTH_EMULATOR=1` と `DEVTRACK_ACCOUNT_DELETION_TEST=1` でエミュレータのみを使用する。
 
 ## PC
 
-Node.js、Rust、Tauriの前提環境が必要。`desktop/.env.local` に `VITE_FIREBASE_API_KEY` と `VITE_FIREBASE_PROJECT_ID` を設定してから以下を実行する。Firebase設定ファイルをGitへ追加しない。WebView内の認証情報はメモリのみに保持し、アプリ終了時に消える。OS資格情報ストアへの永続化は未実装。
+Node.js、Rust、Tauriが必要。`desktop/.env.local` に `VITE_FIREBASE_API_KEY` と `VITE_FIREBASE_PROJECT_ID` を設定。Google Cloudのデスクトップ用OAuthクライアントのJSONを `desktop/google-oauth-client.json` に置き `python3 desktop/run-desktop.py` で起動する。設定ファイルはGit管理対象外。Google認証は外部ブラウザ、ランダムなローカルポート、state、PKCEを使用する。実GoogleログインとWindowsは未検証。
+
+認証状態はメモリのみに保持する。OS資格情報ストアへの永続化は未実装。削除UIはビルド環境変数 `VITE_ENABLE_DELETION=1` で有効にできるが、本番ではサービスの設定・運用検証が完了するまで無効にする。エミュレータには開発時の `VITE_AUTH_EMULATOR=1` で接続する。
+
+## 削除の実装と未完了事項
+
+直近5分の認証を検証する呼び出し可能関数が、本人のUIDだけを用いて削除要求を作る。Firestore Rulesは要求が存在するアカウントのアクセスを拒否する。再試行可能な関数がAuthユーザーを無効化し、`users/{uid}` とサブコレクションを再帰削除した後、Authユーザーを削除する。UIは再認証と明示的な確認の後に要求を送信し、受理と削除完了を区別する。
+
+現時点のデータモデルはプロフィールのみ。将来の追加データの保存先、各端末のローカルデータと端末間の削除伝播、失敗後の運用上の再実行、完了通知、削除マーカーの保持期限と消去は未完成。削除済みユーザーの古いIDトークンによるアクセスを防ぐため、現在はUIDをキーとするマーカーを残す。Firestoreの全データが消えることを保証できる設計ではないため、削除UIは初期状態で無効。エミュレータテストだけであり、本番の関数・Rulesは未デプロイ。
 
 ```sh
-cd desktop
 npm ci
-npm run tauri -- build --debug
+npm ci --prefix functions
+npm run test:emulator
+npm run test:deletion
 ```
-
-開発時に `VITE_AUTH_EMULATOR=1 npm run dev` とすると、ローカルのAuthenticationエミュレータを使用する。リリースビルドではエミュレータ設定を無効にする。Googleログインには外部ブラウザ、PKCE、ループバック受信の実装とGoogle CloudのデスクトップOAuthクライアントが必要で、未実装。
-
-## 削除
-
-`server/deletion.js` は順序と失敗時の振る舞いだけを検証する未接続の設計コード。実サーバー、アクセス停止マーカーを強制するルール、永続的な再試行、Firestore以外のデータと各端末のローカルデータ削除、Google再認証は未実装。アプリの削除操作は有効化しない。将来の削除処理は、最近の認証確認後に書き込みを停止し、全保存先を再帰的に削除してからAuthユーザーを削除する。停止マーカー・再試行記録の保持期間とプライバシーも設計する。

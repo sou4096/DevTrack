@@ -1,5 +1,6 @@
 import FirebaseAuth
 import FirebaseCore
+import FirebaseFunctions
 import GoogleSignIn
 import SwiftUI
 import UIKit
@@ -8,6 +9,7 @@ import UIKit
 final class Session: ObservableObject {
     @Published var user: User?
     @Published var error: String?
+    @Published var notice: String?
     let configured: Bool
     private var listener: AuthStateDidChangeListenerHandle?
 
@@ -56,16 +58,44 @@ final class Session: ObservableObject {
         do { try Auth.auth().signOut(); GIDSignIn.sharedInstance.signOut(); error = nil }
         catch { self.error = error.localizedDescription }
     }
+
+    func requestDeletion(password: String?, useGoogle: Bool) async {
+        do {
+            guard let current = Auth.auth().currentUser else { throw SessionError.noUser }
+            let credential: AuthCredential
+            if useGoogle {
+                guard let clientID = FirebaseApp.app()?.options.clientID else { throw SessionError.missingGoogleConfiguration }
+                guard let controller = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene })
+                    .flatMap(\.windows).first(where: \.isKeyWindow)?.rootViewController else { throw SessionError.noWindow }
+                GIDSignIn.sharedInstance.configuration = GIDConfiguration(clientID: clientID)
+                let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: controller)
+                guard let token = result.user.idToken?.tokenString else { throw SessionError.missingToken }
+                credential = GoogleAuthProvider.credential(withIDToken: token, accessToken: result.user.accessToken.tokenString)
+            } else {
+                guard let email = current.email, let password, !password.isEmpty else { throw SessionError.passwordRequired }
+                credential = EmailAuthProvider.credential(withEmail: email, password: password)
+            }
+            _ = try await current.reauthenticate(with: credential)
+            _ = try await current.getIDToken(forcingRefresh: true)
+            guard Auth.auth().currentUser?.uid == current.uid else { throw SessionError.noUser }
+            _ = try await Functions.functions(region: "asia-northeast1").httpsCallable("requestAccountDeletion").call()
+            try Auth.auth().signOut()
+            GIDSignIn.sharedInstance.signOut()
+            notice = "削除を受け付けました。クラウド上のデータ削除はバックグラウンドで進行します。"
+            error = nil
+        } catch { self.error = error.localizedDescription }
+    }
 }
 
 enum SessionError: LocalizedError {
-    case missingGoogleConfiguration, noWindow, missingToken, noUser
+    case missingGoogleConfiguration, noWindow, missingToken, noUser, passwordRequired
     var errorDescription: String? {
         switch self {
         case .missingGoogleConfiguration: return "Googleログインの設定がありません。"
         case .noWindow: return "ログイン画面を表示できません。"
         case .missingToken: return "Googleの認証情報を取得できませんでした。"
         case .noUser: return "先にログインしてください。"
+        case .passwordRequired: return "再認証のためパスワードを入力してください。"
         }
     }
 }

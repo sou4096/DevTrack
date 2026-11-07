@@ -7,7 +7,8 @@
     "node": ">=22"
   },
   "scripts": {
-    "test:emulator": "firebase emulators:exec --project demo-devtrack --only auth,firestore 'node --test test/*.test.js'"
+    "test:emulator": "firebase emulators:exec --project demo-devtrack --only auth,firestore 'node --test test/*.test.js'",
+    "test:deletion": "firebase emulators:exec --project demo-devtrack --only functions,auth,firestore 'node --test integration/*.test.js'"
   },
   "dependencies": {
     "@firebase/rules-unit-testing": "6.0.0",

@@ -22,6 +22,8 @@ targets:
         product: FirebaseAuth
       - package: Firebase
         product: FirebaseCore
+      - package: Firebase
+        product: FirebaseFunctions
       - package: GoogleSignIn
         product: GoogleSignIn
     info:
@@ -31,9 +33,11 @@ targets:
           - CFBundleURLSchemes:
               - $(GOOGLE_REVERSED_CLIENT_ID)
         UILaunchScreen: {}
+        DevTrackAccountDeletionEnabled: $(DEVTRACK_ACCOUNT_DELETION_ENABLED)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.devtrack.app
+        DEVTRACK_ACCOUNT_DELETION_ENABLED: NO
         GENERATE_INFOPLIST_FILE: NO
         SWIFT_VERSION: '5.0'
         TARGETED_DEVICE_FAMILY: '1,2'

@@ -42,3 +42,15 @@ test('rejects stale versions, changed creation time, physical deletes and collec
   await assertFails(getDocs(collection(db, 'users')));
   await assertFails(setDoc(doc(db, 'users/alice/projects/p1'), {name: 'x'}));
 });
+
+test('a deletion marker blocks owner reads and writes and cannot be changed by a client', async () => {
+  const db = env.authenticatedContext('alice').firestore();
+  await assertSucceeds(setDoc(ref(db), profile()));
+  await assertFails(setDoc(doc(db, 'deletionRequests/alice'), {status: 'pending'}));
+  await env.withSecurityRulesDisabled(async context => {
+    await setDoc(doc(context.firestore(), 'deletionRequests/alice'), {status: 'pending'});
+  });
+  await assertFails(getDoc(ref(db)));
+  await assertFails(updateDoc(ref(db), {version: 2}));
+  await assertFails(deleteDoc(doc(db, 'deletionRequests/alice')));
+});
