@@ -1,6 +1,6 @@
 # DevTrack
 
-開発時間を記録・同期・分析するiOS、macOS、Windows向けアプリの開発プロジェクトです。現在は基盤構築中で、アプリや同期機能はまだ利用できません。
+開発時間を記録・同期・分析するiOS、macOS、Windows向けアプリの開発プロジェクトです。現在は開発中です。iOSにローカルのプロジェクト管理とタイマーの試作があります。同期・分析などは未実装です。
 
 ## 計画している機能
 
@@ -46,6 +46,6 @@ npm ci
 npm run test:emulator
 ```
 
-iOS・PCの認証画面とGoogle連携は試作段階で、実Googleアカウントでの検証は未完了です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実Firebaseプロジェクトに適用済みです。Firestore等を含む完全なアカウント削除は未実装です。
+iOSシミュレータとmacOSで実Googleアカウントのログインを確認しています。iOS実機・Windowsは未検証です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実Firebaseプロジェクトに適用済みです。Firestore等を含む完全なアカウント削除は未実装です。
 
-認証と削除機能の開発状況、Firebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOS・Windowsの実Googleログインの検証と、アカウントの完全削除は未完成です。
+認証と削除機能の開発状況、Firebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOS実機・WindowsでのGoogleログインの検証と、アカウントの完全削除は未完成です。

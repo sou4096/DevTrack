@@ -1,10 +1,18 @@
 import XCTest
 
 final class AuthenticationUITests: XCTestCase {
-    func testEmailRegistrationAndSignOut() {
+    private func prepareLogin(_ app: XCUIApplication) {
+        let account = app.buttons["アカウント"]
+        if account.waitForExistence(timeout: 3) {
+            account.tap()
+            if app.buttons["ログアウト"].waitForExistence(timeout: 5) { app.buttons["ログアウト"].tap() }
+        }
+    }
+    func testEmailRegistrationRestoresAccountAndSignOut() {
         let app = XCUIApplication()
         app.launchEnvironment["DEVTRACK_AUTH_EMULATOR"] = "1"
         app.launch()
+        prepareLogin(app)
         let email = app.textFields["メールアドレス"]
         XCTAssertTrue(email.waitForExistence(timeout: 20))
         email.tap()
@@ -13,17 +21,23 @@ final class AuthenticationUITests: XCTestCase {
         password.tap()
         password.typeText("password123")
         app.buttons["アカウント作成"].tap()
+        XCTAssertTrue(app.buttons["アカウント"].waitForExistence(timeout: 20))
+        app.terminate(); app.launch()
+        let account = app.buttons["アカウント"]
+        XCTAssertTrue(account.waitForExistence(timeout: 20))
+        account.tap()
         let signOut = app.buttons["ログアウト"]
         XCTAssertTrue(signOut.waitForExistence(timeout: 20))
         signOut.tap()
         XCTAssertTrue(app.buttons["ログイン"].waitForExistence(timeout: 10))
     }
 
-    func testDeleteAccountWithPassword() {
+    func testRestoredAccountCanRequestDeletionWithPassword() {
         let app = XCUIApplication()
         app.launchEnvironment["DEVTRACK_AUTH_EMULATOR"] = "1"
         app.launchEnvironment["DEVTRACK_ACCOUNT_DELETION_TEST"] = "1"
         app.launch()
+        prepareLogin(app)
         let email = app.textFields["メールアドレス"]
         XCTAssertTrue(email.waitForExistence(timeout: 20))
         email.tap()
@@ -32,6 +46,11 @@ final class AuthenticationUITests: XCTestCase {
         password.tap()
         password.typeText("password123")
         app.buttons["アカウント作成"].tap()
+        XCTAssertTrue(app.buttons["アカウント"].waitForExistence(timeout: 20))
+        app.terminate(); app.launch()
+        let account = app.buttons["アカウント"]
+        XCTAssertTrue(account.waitForExistence(timeout: 20))
+        account.tap()
         let deletePassword = app.secureTextFields["削除確認用パスワード"]
         XCTAssertTrue(deletePassword.waitForExistence(timeout: 20))
         deletePassword.tap()

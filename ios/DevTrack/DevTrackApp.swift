@@ -24,7 +24,13 @@ struct DevTrackApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(session: session)
+            Group {
+                if let user = session.user {
+                    MainTabs(session: session, userID: user.uid).id(user.uid)
+                } else {
+                    ContentView(session: session)
+                }
+            }
                 .onOpenURL { url in _ = GIDSignIn.sharedInstance.handle(url) }
         }
     }

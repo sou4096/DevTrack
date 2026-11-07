@@ -26,6 +26,7 @@ targets:
         product: FirebaseFunctions
       - package: GoogleSignIn
         product: GoogleSignIn
+      - sdk: libsqlite3.tbd
     info:
       path: DevTrack/Info.plist
       properties:
@@ -52,11 +53,23 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.devtrack.app.uitests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: '5.0'
+  DevTrackTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [DevTrackTests]
+    dependencies:
+      - target: DevTrack
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.devtrack.app.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: '5.0'
 schemes:
   DevTrack:
     build:
       targets:
         DevTrack: all
         DevTrackUITests: [test]
+        DevTrackTests: [test]
     test:
-      targets: [DevTrackUITests]
+      targets: [DevTrackUITests, DevTrackTests]
