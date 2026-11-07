@@ -1,6 +1,6 @@
 # Firebaseと開発環境
 
-プロジェクト `devtrack-19cf3` にiOSアプリ `com.devtrack.app` とPC用Webアプリを登録済み。メール・Googleプロバイダを有効化し、メール認証を実環境で検証済み。設定ファイルは公開リポジトリに含めない。Firestore APIは有効化済み。データベースは未作成でリージョン選択を確認中。課金は無効で、Cloud Functionsの本番デプロイにはBlazeプランが必要。
+プロジェクト `devtrack-19cf3` にiOSアプリ `com.devtrack.app` とPC用Webアプリを登録済み。メール・Googleプロバイダを有効化し、メール認証を実環境で検証済み。設定ファイルは公開リポジトリに含めない。Firestore APIは有効化済み。データベースは未作成でリージョン選択を確認中。課金は無効で、ユーザーの意向により今回はBlazeプランへ変更しない。Cloud Functionsの本番デプロイにはBlazeプランが必要。
 
 ## iOS
 
