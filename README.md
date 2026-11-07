@@ -46,6 +46,6 @@ npm ci
 npm run test:emulator
 ```
 
-iOS・PCの認証画面とGoogle連携は試作段階で、実Googleアカウントでの検証は未完了です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実Firebaseプロジェクトに適用済みです。Firestore等を含む完全なアカウント削除は未実装です。
+iOSシミュレータとmacOSで実Googleアカウントのログインを確認しています。iOS実機・Windowsは未検証です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実Firebaseプロジェクトに適用済みです。Firestore等を含む完全なアカウント削除は未実装です。
 
-認証と削除機能の開発状況、Firebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOS・Windowsの実Googleログインの検証と、アカウントの完全削除は未完成です。
+認証と削除機能の開発状況、Firebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOS実機・WindowsでのGoogleログインの検証と、アカウントの完全削除は未完成です。

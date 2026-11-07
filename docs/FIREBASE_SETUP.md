@@ -13,7 +13,7 @@ xcodegen generate
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project DevTrack.xcodeproj -scheme DevTrack -sdk iphonesimulator CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- build
 ```
 
-実Googleログインは未検証。削除UIは `DEVTRACK_ACCOUNT_DELETION_ENABLED=YES` のビルド設定で有効にできるが、本番サービスの設定・運用検証が完了するまで無効とする。シミュレータUIテストは `DEVTRACK_AUTH_EMULATOR=1` と `DEVTRACK_ACCOUNT_DELETION_TEST=1` でエミュレータのみを使用する。
+実GoogleログインはiOSシミュレータでアカウント表示まで確認済み。実機は未検証。削除UIは `DEVTRACK_ACCOUNT_DELETION_ENABLED=YES` のビルド設定で有効にできるが、本番サービスの設定・運用検証が完了するまで無効とする。シミュレータUIテストは `DEVTRACK_AUTH_EMULATOR=1` と `DEVTRACK_ACCOUNT_DELETION_TEST=1` でエミュレータのみを使用する。
 
 ## PC
 
