@@ -19,9 +19,17 @@ if (!key && !emulator) {
   root.innerHTML = `<h1>DevTrack</h1><section id="signed-out"><form><label>メールアドレス<input name="email" type="email" autocomplete="username" required></label><label>パスワード<input name="password" type="password" autocomplete="current-password" required></label><div><button type="submit">ログイン</button><button type="button" id="register">アカウント作成</button></div></form><button id="google">Googleでログイン</button></section><section id="signed-in" hidden><p id="account"></p><button id="link-google">Googleアカウントを連携</button><button id="sign-out">ログアウト</button><div id="deletion" hidden><label>削除確認用パスワード<input id="delete-password" type="password" autocomplete="current-password"></label><button id="delete-password-account">パスワードで再認証して削除</button><button id="delete-google-account">Googleで再認証して削除</button></div></section><p id="deletion-pending">アカウントの完全削除は準備中です。</p><p id="notice" role="status"></p><p id="error" role="alert"></p>`;
   const form = root.querySelector('form');
   const error = root.querySelector('#error');
+  let busy = false;
   async function perform(operation) {
+    if (busy) return;
+    busy = true;
+    root.querySelectorAll('button, input').forEach(element => { element.disabled = true; });
     error.textContent = '';
     try { await operation(); form.reset(); } catch (e) { error.textContent = typeof e === 'string' ? e : e.message; }
+    finally {
+      busy = false;
+      root.querySelectorAll('button, input').forEach(element => { element.disabled = false; });
+    }
   }
   const credentials = () => [form.elements.email.value, form.elements.password.value];
   form.addEventListener('submit', event => { event.preventDefault(); perform(() => signInWithEmailAndPassword(auth, ...credentials())); });
@@ -59,6 +67,7 @@ if (!key && !emulator) {
     if (auth.currentUser !== user) throw new Error('ログイン状態が変更されました。');
     await reauthenticateWithCredential(user, credential);
     await user.getIdToken(true);
+    if (auth.currentUser !== user) throw new Error('ログイン状態が変更されました。');
     await httpsCallable(functions, 'requestAccountDeletion')({});
     await signOut(auth);
     root.querySelector('#notice').textContent = '削除を受け付けました。クラウド上のデータ削除はバックグラウンドで進行します。';
