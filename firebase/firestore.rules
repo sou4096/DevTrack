@@ -2,7 +2,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+      return request.auth != null && request.auth.uid == uid
+        && !exists(/databases/$(database)/documents/deletionRequests/$(uid));
     }
     function validProfile(data, uid) {
       return data.keys().hasAll(['uid', 'displayName', 'createdAt', 'updatedAt', 'version'])

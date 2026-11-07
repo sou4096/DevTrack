@@ -28,4 +28,57 @@ jobs:
           distribution: temurin
           java-version: '21'
       - run: npm ci
+      - run: npm ci --prefix functions
       - run: npm run test:emulator
+      - run: npm run test:deletion
+  desktop-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm run build
+  desktop-rust:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+        working-directory: desktop
+      - run: npm run build
+        working-directory: desktop
+      - run: cargo test --locked --manifest-path desktop/src-tauri/Cargo.toml
+  ios-simulator:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: npm ci
+      - run: npm ci --prefix functions
+      - run: command -v xcodegen || brew install xcodegen
+      - run: xcodegen generate
+        working-directory: ios
+      - name: Test iOS authentication and deletion
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available --json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(next(x["udid"] for k,v in sorted(d["devices"].items(), reverse=True) if "iOS" in k for x in v if "iPhone" in x["name"] and x["isAvailable"]))')
+          ./node_modules/.bin/firebase emulators:exec --project demo-devtrack --only functions,auth,firestore "xcodebuild -quiet -project ios/DevTrack.xcodeproj -scheme DevTrack -destination 'platform=iOS Simulator,id=$DEVICE_ID' CODE_SIGNING_ALLOWED=YES CODE_SIGN_IDENTITY=- test"

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "DevTrack",
+  "version": "0.1.0",
+  "identifier": "com.devtrack.app.desktop",
+  "build": {"beforeDevCommand": "npm run dev", "devUrl": "http://127.0.0.1:5173", "beforeBuildCommand": "npm run build", "frontendDist": "../dist"},
+  "app": {"windows": [{"title": "DevTrack", "width": 640, "height": 650}], "security": {"csp": "default-src 'self'; connect-src 'self' https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://asia-northeast1-devtrack-19cf3.cloudfunctions.net http://127.0.0.1:9099 http://127.0.0.1:5001; style-src 'self' 'unsafe-inline'"}},
+  "bundle": {"active": false}
+}

@@ -1,0 +1,62 @@
+name: DevTrack
+options:
+  deploymentTarget:
+    iOS: '16.0'
+configFiles:
+  Debug: Config/Base.xcconfig
+  Release: Config/Base.xcconfig
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk.git
+    from: 12.0.0
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS.git
+    from: 9.0.0
+targets:
+  DevTrack:
+    type: application
+    platform: iOS
+    sources: [DevTrack]
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseCore
+      - package: Firebase
+        product: FirebaseFunctions
+      - package: GoogleSignIn
+        product: GoogleSignIn
+    info:
+      path: DevTrack/Info.plist
+      properties:
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - $(GOOGLE_REVERSED_CLIENT_ID)
+        UILaunchScreen: {}
+        DevTrackAccountDeletionEnabled: $(DEVTRACK_ACCOUNT_DELETION_ENABLED)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.devtrack.app
+        DEVTRACK_ACCOUNT_DELETION_ENABLED: NO
+        GENERATE_INFOPLIST_FILE: NO
+        SWIFT_VERSION: '5.0'
+        TARGETED_DEVICE_FAMILY: '1,2'
+  DevTrackUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [DevTrackUITests]
+    dependencies:
+      - target: DevTrack
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.devtrack.app.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: '5.0'
+schemes:
+  DevTrack:
+    build:
+      targets:
+        DevTrack: all
+        DevTrackUITests: [test]
+    test:
+      targets: [DevTrackUITests]

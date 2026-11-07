@@ -2,7 +2,7 @@
 import {
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   signOut, linkWithCredential, signInWithCredential, GoogleAuthProvider,
-  EmailAuthProvider, reauthenticateWithCredential, deleteUser
+  EmailAuthProvider, reauthenticateWithCredential
 } from 'firebase/auth';
 
 export function createAuthService(auth) {
@@ -21,11 +21,6 @@ export function createAuthService(auth) {
       const user = auth.currentUser;
       if (!user?.email) throw new Error('An email account must be signed in');
       return reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, password));
-    },
-    // Authentication account only: application data deletion requires a separate trusted workflow.
-    deleteAuthAccount: () => {
-      if (!auth.currentUser) throw new Error('No signed-in account');
-      return deleteUser(auth.currentUser);
     }
   };
 }
