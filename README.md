@@ -22,7 +22,7 @@ SQLiteを各端末の記録の正本とし、変更と送信キューを同じ�
 
 自動計測は対象アプリの前面状態・操作状態・プロジェクト判定を組み合わせる予定です。ロックやスリープ中は計上せず、放置時間は確認待ちにします。ブラウザ情報は許可された対象に限定します。
 
-Firebase UIDによる分離、Firestore Security Rules、OSの資格情報ストア、PCのOAuthとPKCEを前提に設計します。管理者秘密鍵をアプリに組み込みません。ルールとエミュレータテストは未実装です。
+Firebase UIDによる分離、Firestore Security Rules、OSの資格情報ストア、PCのOAuthとPKCEを前提に設計します。管理者秘密鍵をアプリに組み込みません。プロフィールと削除時のアクセス制御をエミュレータで検証しています。
 
 ## 開発と検証
 
@@ -46,6 +46,6 @@ npm ci
 npm run test:emulator
 ```
 
-認証アダプターはFirebase JavaScript SDKによる検証用の初版で、iOS・PCアプリへの組み込みやGoogleの実ログイン画面は未実装です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実環境への適用は行っていません。Firestore等を含む完全なアカウント削除は未実装です。
+iOS・PCの認証画面とGoogle連携は試作段階で、実Googleアカウントでの検証は未完了です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実環境への適用は行っていません。Firestore等を含む完全なアカウント削除は未実装です。
 
-認証と削除機能の開発状況、Firebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOSの実Googleログイン、PCのGoogleログイン、アカウントの完全削除は未完成です。
+認証と削除機能の開発状況、Firebaseのセットアップ状況は [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md) を参照してください。iOS・PCの実Googleログインの検証と、アカウントの完全削除は未完成です。
