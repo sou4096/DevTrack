@@ -42,4 +42,4 @@
 
 - PC用OAuthクライアントのJSONが指定の除外対象パスに存在し、Firebaseと同一プロジェクトのデスクトップ用設定であることを確認。ファイル権限は所有者のみ読み書き可能。
 - TauriのJavaScript API・CLIのバージョンをRust側と同じ2.12系に合わせ、macOSのアプリバンドル生成、PCフロントエンドのビルドとRustの認証テスト2件が成功。
-- 実Google認証の確認は、起動したPCアプリからのユーザー操作待ち。iOSとWindowsの実Google認証も未検証。
+- PC版の実Google認証後、ユーザーからアプリにメールアドレスが表示されたと報告あり。iOSは実Google認証の操作待ち、Windowsは未検証。

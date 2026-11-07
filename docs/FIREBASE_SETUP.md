@@ -17,7 +17,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Dev
 
 ## PC
 
-Node.js、Rust、Tauriが必要。`desktop/.env.local` に `VITE_FIREBASE_API_KEY` と `VITE_FIREBASE_PROJECT_ID` を設定。Google Cloudのデスクトップ用OAuthクライアントのJSONを `desktop/google-oauth-client.json` に置き `python3 desktop/run-desktop.py` で起動する。設定ファイルはGit管理対象外。Google認証は外部ブラウザ、ランダムなローカルポート、state、PKCEを使用する。実GoogleログインとWindowsは未検証。
+Node.js、Rust、Tauriが必要。`desktop/.env.local` に `VITE_FIREBASE_API_KEY` と `VITE_FIREBASE_PROJECT_ID` を設定。Google Cloudのデスクトップ用OAuthクライアントのJSONを `desktop/google-oauth-client.json` に置き `python3 desktop/run-desktop.py` で起動する。設定ファイルはGit管理対象外。Google認証は外部ブラウザ、ランダムなローカルポート、state、PKCEを使用する。macOSでは実Googleログイン後にメールアドレスがアプリへ表示されたとユーザーが確認済み。Windowsは未検証。
 
 認証状態はメモリのみに保持する。OS資格情報ストアへの永続化は未実装。削除UIはビルド環境変数 `VITE_ENABLE_DELETION=1` で有効にできるが、本番ではサービスの設定・運用検証が完了するまで無効にする。エミュレータには開発時の `VITE_AUTH_EMULATOR=1` で接続する。
 
