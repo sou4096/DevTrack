@@ -36,3 +36,14 @@ python3 scripts/check_foundation.py
 iOSのビルドにはXcode、デスクトップ開発にはRust、Node.jsおよび各OS向けTauri 2の前提環境が必要です。アプリのビルド手順は実装時に追加します。
 
 仕様は [docs/SPEC.md](docs/SPEC.md)、構成は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)、計画と検証状況は [docs/DEVELOPMENT_PLAN.md](docs/DEVELOPMENT_PLAN.md) と [docs/PROGRESS.md](docs/PROGRESS.md) を参照してください。画面は未実装のためスクリーンショットはありません。AI支援を利用して開発しています。
+
+## Firebaseエミュレータ検証
+
+Node.js 24とJava 21を用意し、以下を実行します。実Firebaseプロジェクトではなく `demo-devtrack` とローカルエミュレータを使用します。
+
+```sh
+npm ci
+npm run test:emulator
+```
+
+認証アダプターはFirebase JavaScript SDKによる検証用の初版で、iOS・PCアプリへの組み込みやGoogleの実ログイン画面は未実装です。Firestoreルールはユーザープロフィールのみ許可し、他のパスを拒否します。実環境への適用は行っていません。アカウント削除は認証アカウントのみで、Firestore等を含む完全削除は未実装です。

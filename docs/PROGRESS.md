@@ -2,9 +2,9 @@
 
 更新: 2026-11-08（日本時間）
 
-- Phase 0: 作業中。リポジトリを取得し、仕様・構成・計画・基盤チェックとCI定義を追加。
-- ローカル検証: `python3 -m unittest discover -s tests -v` 1件成功、`python3 scripts/check_foundation.py` 成功。GitHub Actionsは未実行。
-- Phase 1〜8: 未着手。アプリ、認証、同期、計測機能は未実装。
-- 開発環境: macOS。Xcodeのフルインストールは利用できず、Node.js、Rust、Firebase CLIもPATH上にない。Windows・iOS実機は未検証。
-- 次の作業: ローカル基盤チェックとGitHub Actionsの実行結果を確認し、Xcodeおよび対象開発ツールを準備する。Firebaseの設定と認証・Rulesの設計に着手する前に必要なサービス設定を確認する。
-- 基盤チェックはアプリの動作、セキュリティ、同期の正しさを検証しない。
+- Phase 0: 基盤文書・テスト・CI定義あり。Xcode 26.6は `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` で利用可能。Node.js 24とJava 21をHomebrewで導入。Rust、Windows開発環境は未確認。GitHub Actionsの実行状況は別途確認する。
+- Phase 1: Firebase JavaScript SDKの認証アダプターとプロフィール用Firestore Rulesを試作。エミュレータでメール認証・Google模擬資格情報による連携・ユーザー分離・検証ルールをテスト。iOS・PCアプリへの組み込み、実Googleログイン、実Firebase設定、完全なアカウント削除は未実装。Rulesは実プロジェクト未デプロイ。
+- Phase 2〜8: 未着手。同期・タイマー・自動計測は未実装。
+- 検証環境: `PATH="/opt/homebrew/opt/node@24/bin:/opt/homebrew/opt/openjdk@21/bin:$PATH" JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home" npm run test:emulator`。基盤検証は `python3 -m unittest discover -s tests -v` と `python3 scripts/check_foundation.py`。
+- npm監査: 開発用依存関係などに中程度の指摘が残る。Firestoreの古いgRPC依存は一時的に上書きしており、SDK更新時に再評価する。
+- 次: CI結果を確認、iOSアプリと実Firebaseの登録・認証設定を行い、実端末とGoogle認証を検証する。モデル・同期プロトコルに合わせてルールを拡張し、完全削除フローを設計する。

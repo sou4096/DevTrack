@@ -1,0 +1,24 @@
+{
+  "name": "devtrack-foundation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test:emulator": "firebase emulators:exec --project demo-devtrack --only auth,firestore 'node --test test/*.test.js'"
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.2.0"
+  },
+  "devDependencies": {
+    "firebase-tools": "15.35.0"
+  },
+  "overrides": {
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.14.7"
+    }
+  }
+}

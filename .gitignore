@@ -25,3 +25,5 @@ firebase-debug.log
 *.db-*
 __pycache__/
 *.pyc
+firestore-debug.log
+ui-debug.log
