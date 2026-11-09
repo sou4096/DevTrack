@@ -25,6 +25,45 @@ service cloud.firestore {
         && request.resource.data.updatedAt >= resource.data.updatedAt
         && request.resource.data.version == resource.data.version + 1;
     }
+    function validHistory(data, id) {
+      return data.keys().hasOnly(['id','sessionID','projectID','projectName','categoryID','categoryName',
+                                 'start','end','note','source','deleted','version','operationID'])
+        && data.keys().hasAll(['id','sessionID','projectID','projectName','categoryID','categoryName',
+                               'start','end','note','source','deleted','version','operationID'])
+        && data.id == id && id.matches('[A-Za-z0-9_-]{1,128}')
+        && data.sessionID is string && data.sessionID.matches('[A-Za-z0-9_-]{1,128}')
+        && data.projectID is string && data.projectID.matches('[A-Za-z0-9_-]{1,128}')
+        && data.categoryID is string && data.categoryID.matches('[A-Za-z0-9_-]{1,128}')
+        && data.operationID is string && data.operationID.matches('[A-Za-z0-9_-]{1,128}')
+        && data.projectName is string && data.projectName.size() > 0 && data.projectName.toUtf8().size() <= 16000
+        && data.categoryName is string && data.categoryName.size() > 0 && data.categoryName.toUtf8().size() <= 16000
+        && data.note is string && data.note.toUtf8().size() <= 32000
+        && data.source in ['timer', 'manual'] && data.deleted is bool
+        && data.start is number && data.end is number && data.start <= data.end
+        && data.start >= -62135596800 && data.end < 253402300800
+        && data.version is int && data.version >= 1;
+    }
+    match /users/{uid}/history/{id} {
+      allow read: if isOwner(uid);
+      allow create, update: if isOwner(uid) && validHistory(request.resource.data, id)
+        && (!exists(/databases/$(database)/documents/users/$(uid)/history/$(id))
+              ? request.resource.data.version == 1
+              : request.resource.data.version == resource.data.version + 1
+                && request.resource.data.sessionID == resource.data.sessionID)
+        && !exists(/databases/$(database)/documents/users/$(uid)/historyOps/$(request.resource.data.operationID))
+        && getAfter(/databases/$(database)/documents/users/$(uid)/historyOps/$(request.resource.data.operationID)).data.diff(request.resource.data).affectedKeys().hasOnly(['committedAt']);
+      allow delete: if false;
+    }
+    match /users/{uid}/historyOps/{operationID} {
+      allow read: if isOwner(uid);
+      allow update, delete: if false;
+      allow create: if isOwner(uid)
+        && operationID.matches('[A-Za-z0-9_-]{1,128}')
+        && request.resource.data.id is string && request.resource.data.id.matches('[A-Za-z0-9_-]{1,128}')
+        && request.resource.data.operationID == operationID
+        && request.resource.data.committedAt == request.time
+        && request.resource.data.diff(getAfter(/databases/$(database)/documents/users/$(uid)/history/$(request.resource.data.id)).data).affectedKeys().hasOnly(['committedAt']);
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

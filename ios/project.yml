@@ -24,6 +24,8 @@ targets:
         product: FirebaseCore
       - package: Firebase
         product: FirebaseFunctions
+      - package: Firebase
+        product: FirebaseFirestore
       - package: GoogleSignIn
         product: GoogleSignIn
       - sdk: libsqlite3.tbd
@@ -73,3 +75,5 @@ schemes:
         DevTrackTests: [test]
     test:
       targets: [DevTrackUITests, DevTrackTests]
+      environmentVariables:
+        DEVTRACK_AUTH_EMULATOR: '1'

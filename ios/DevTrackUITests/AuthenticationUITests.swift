@@ -1,5 +1,14 @@
 import XCTest
 
+func dismissSystemPasswordPromptIfPresent() {
+    let app = XCUIApplication()
+    let decline = app.buttons.matching(NSPredicate(format: "label IN %@", ["今はしない", "Not Now"])).firstMatch
+    if decline.waitForExistence(timeout: 4) {
+        decline.tap()
+        XCTAssertTrue(decline.waitForNonExistence(timeout: 5))
+    }
+}
+
 final class AuthenticationUITests: XCTestCase {
     private func prepareLogin(_ app: XCUIApplication) {
         let account = app.buttons["アカウント"]
@@ -8,7 +17,7 @@ final class AuthenticationUITests: XCTestCase {
             if app.buttons["ログアウト"].waitForExistence(timeout: 5) { app.buttons["ログアウト"].tap() }
         }
     }
-    func testEmailRegistrationRestoresAccountAndSignOut() {
+    func testRegistrationAndLoginImmediatelyAllowNavigation() {
         let app = XCUIApplication()
         app.launchEnvironment["DEVTRACK_AUTH_EMULATOR"] = "1"
         app.launch()
@@ -16,13 +25,14 @@ final class AuthenticationUITests: XCTestCase {
         let email = app.textFields["メールアドレス"]
         XCTAssertTrue(email.waitForExistence(timeout: 20))
         email.tap()
-        email.typeText("ios-\(UUID().uuidString.lowercased())@example.test")
+        let address = "ios-\(UUID().uuidString.lowercased())@example.test"
+        email.typeText(address)
         let password = app.secureTextFields["パスワード"]
         password.tap()
         password.typeText("password123")
         app.buttons["アカウント作成"].tap()
         XCTAssertTrue(app.buttons["アカウント"].waitForExistence(timeout: 20))
-        app.terminate(); app.launch()
+        dismissSystemPasswordPromptIfPresent()
         let account = app.buttons["アカウント"]
         XCTAssertTrue(account.waitForExistence(timeout: 20))
         account.tap()
@@ -30,9 +40,18 @@ final class AuthenticationUITests: XCTestCase {
         XCTAssertTrue(signOut.waitForExistence(timeout: 20))
         signOut.tap()
         XCTAssertTrue(app.buttons["ログイン"].waitForExistence(timeout: 10))
+        let loginEmail = app.textFields["メールアドレス"]
+        loginEmail.tap(); loginEmail.typeText(address)
+        let loginPassword = app.secureTextFields["パスワード"]
+        loginPassword.tap(); loginPassword.typeText("password123")
+        app.buttons["ログイン"].tap()
+        XCTAssertTrue(app.buttons["アカウント"].waitForExistence(timeout: 20))
+        dismissSystemPasswordPromptIfPresent()
+        app.buttons["アカウント"].tap()
+        XCTAssertTrue(app.buttons["ログアウト"].waitForExistence(timeout: 10))
     }
 
-    func testRestoredAccountCanRequestDeletionWithPassword() {
+    func testAccountCanRequestDeletionWithPassword() {
         let app = XCUIApplication()
         app.launchEnvironment["DEVTRACK_AUTH_EMULATOR"] = "1"
         app.launchEnvironment["DEVTRACK_ACCOUNT_DELETION_TEST"] = "1"
@@ -47,7 +66,7 @@ final class AuthenticationUITests: XCTestCase {
         password.typeText("password123")
         app.buttons["アカウント作成"].tap()
         XCTAssertTrue(app.buttons["アカウント"].waitForExistence(timeout: 20))
-        app.terminate(); app.launch()
+        dismissSystemPasswordPromptIfPresent()
         let account = app.buttons["アカウント"]
         XCTAssertTrue(account.waitForExistence(timeout: 20))
         account.tap()

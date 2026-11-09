@@ -1,7 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { initializeAuth, inMemoryPersistence, connectAuthEmulator, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithCredential, linkWithCredential, reauthenticateWithCredential, EmailAuthProvider, GoogleAuthProvider, signOut } from 'firebase/auth';
 import { getFunctions, connectFunctionsEmulator, httpsCallable } from 'firebase/functions';
+import { initializeFirestore, memoryLocalCache, connectFirestoreEmulator } from 'firebase/firestore';
 import { invoke } from '@tauri-apps/api/core';
+import { mountHistory } from './history-ui.js';
 import './style.css';
 
 const root = document.querySelector('#app');
@@ -15,8 +17,14 @@ if (!key && !emulator) {
   if (emulator) connectAuthEmulator(auth, 'http://127.0.0.1:9099', {disableWarnings: true});
   const functions = getFunctions(app, 'asia-northeast1');
   if (emulator) connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+  const db = initializeFirestore(app, {localCache: memoryLocalCache(), experimentalForceLongPolling: true});
+  if (emulator) {
+    const port = Number(import.meta.env.VITE_FIRESTORE_EMULATOR_PORT || 8080);
+    if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('Firestoreエミュレータのポートを確認してください。');
+    connectFirestoreEmulator(db, '127.0.0.1', port);
+  }
   const deletionEnabled = import.meta.env.VITE_ENABLE_DELETION === '1';
-  root.innerHTML = `<h1>DevTrack</h1><section id="signed-out"><form><label>メールアドレス<input name="email" type="email" autocomplete="username" required></label><label>パスワード<input name="password" type="password" autocomplete="current-password" required></label><div><button type="submit">ログイン</button><button type="button" id="register">アカウント作成</button></div></form><button id="google">Googleでログイン</button></section><section id="signed-in" hidden><p id="account"></p><button id="link-google">Googleアカウントを連携</button><button id="sign-out">ログアウト</button><div id="deletion" hidden><label>削除確認用パスワード<input id="delete-password" type="password" autocomplete="current-password"></label><button id="delete-password-account">パスワードで再認証して削除</button><button id="delete-google-account">Googleで再認証して削除</button></div></section><p id="deletion-pending">アカウントの完全削除は準備中です。</p><p id="notice" role="status"></p><p id="error" role="alert"></p>`;
+  root.innerHTML = `<h1>DevTrack</h1><section id="signed-out"><form><label>メールアドレス<input name="email" type="email" autocomplete="username" required></label><label>パスワード<input name="password" type="password" autocomplete="current-password" required></label><div><button type="submit">ログイン</button><button type="button" id="register">アカウント作成</button></div></form><button id="google">Googleでログイン</button></section><section id="signed-in" hidden><p id="account"></p><button id="link-google">Googleアカウントを連携</button><button id="sign-out">ログアウト</button><div id="deletion" hidden><label>削除確認用パスワード<input id="delete-password" type="password" autocomplete="current-password"></label><button id="delete-password-account">パスワードで再認証して削除</button><button id="delete-google-account">Googleで再認証して削除</button></div><section id="history"></section></section><p id="deletion-pending">アカウントの完全削除は準備中です。</p><p id="notice" role="status"></p><p id="error" role="alert"></p>`;
   const form = root.querySelector('form');
   const error = root.querySelector('#error');
   let busy = false;
@@ -75,7 +83,9 @@ if (!key && !emulator) {
   root.querySelector('#delete-password-account').addEventListener('click', () => perform(() => removeAccount(false)));
   root.querySelector('#delete-google-account').addEventListener('click', () => perform(() => removeAccount(true)));
   root.querySelector('#sign-out').addEventListener('click', () => perform(() => signOut(auth)));
+  let unmountHistory = () => {};
   onAuthStateChanged(auth, user => {
+    unmountHistory(); unmountHistory = () => {};
     root.querySelector('#signed-out').hidden = !!user;
     root.querySelector('#signed-in').hidden = !user;
     root.querySelector('#account').textContent = user?.email ?? '';
@@ -83,5 +93,6 @@ if (!key && !emulator) {
     root.querySelector('#deletion-pending').hidden = deletionEnabled;
     root.querySelector('#delete-password-account').hidden = !user?.providerData.some(p => p.providerId === 'password');
     root.querySelector('#delete-google-account').hidden = !user?.providerData.some(p => p.providerId === 'google.com');
+    if (user) unmountHistory = mountHistory({root:root.querySelector('#history'),user,auth,db,emulator});
   });
 }
